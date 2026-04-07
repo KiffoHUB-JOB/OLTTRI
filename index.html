@@ -3,426 +3,326 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Buscador de OLT por Bairro</title>
+  <title>OLT Finder — Buscador de Bairros</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #f5f5f2;
-      --surface: #ffffff;
-      --border: rgba(0,0,0,0.1);
-      --border-hover: rgba(0,0,0,0.22);
-      --text-primary: #1a1a1a;
-      --text-secondary: #5f5e5a;
-      --text-tertiary: #999890;
-      --radius-md: 8px;
-      --radius-lg: 12px;
+      --bg: #0d0f12; --surface: #13161b; --surface2: #1a1e26;
+      --border: rgba(255,255,255,0.07); --border-hi: rgba(255,255,255,0.14);
+      --text: #e8eaf0; --muted: #6b7280; --accent: #3b82f6;
+      --accent-glow: rgba(59,130,246,0.18);
     }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1c1c1a;
-        --surface: #252523;
-        --border: rgba(255,255,255,0.1);
-        --border-hover: rgba(255,255,255,0.22);
-        --text-primary: #f0ede8;
-        --text-secondary: #a8a69f;
-        --text-tertiary: #6b6a64;
-      }
-    }
-
+    html { scroll-behavior: smooth; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text-primary);
-      min-height: 100vh;
-      padding: 2rem 1rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; overflow-x: hidden;
     }
-
-    .container {
-      max-width: 700px;
-      margin: 0 auto;
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
     }
+    .page { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
 
-    header {
-      margin-bottom: 2rem;
+    .header { margin-bottom: 2.5rem; animation: fadeUp 0.5s ease both; }
+    .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 0.6rem; }
+    .logo-icon {
+      width: 36px; height: 36px; border: 1px solid var(--accent); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent-glow); box-shadow: 0 0 18px var(--accent-glow);
     }
+    .logo-icon svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; stroke-width: 1.8; }
+    .logo-text { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; }
+    .header h1 { font-size: 28px; font-weight: 300; color: var(--text); letter-spacing: -0.02em; line-height: 1.2; }
+    .header h1 strong { font-weight: 500; }
+    .header p { margin-top: 6px; font-size: 13px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
 
-    header h1 {
-      font-size: 22px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 4px;
+    .stats-bar {
+      display: flex; gap: 1px; margin-bottom: 1.5rem;
+      border-radius: 10px; overflow: hidden; border: 1px solid var(--border);
+      animation: fadeUp 0.5s 0.08s ease both;
     }
+    .stat-pill { flex: 1; background: var(--surface); padding: 10px 14px; text-align: center; }
+    .stat-pill .val { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 500; color: var(--accent); }
+    .stat-pill .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
 
-    header p {
-      font-size: 14px;
-      color: var(--text-secondary);
+    .search-wrap { position: relative; margin-bottom: 1rem; animation: fadeUp 0.5s 0.14s ease both; }
+    .search-wrap input {
+      width: 100%; padding: 14px 48px;
+      background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: 10px; font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px; color: var(--text); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s; letter-spacing: 0.04em;
     }
-
-    .search-box {
-      position: relative;
-      margin-bottom: 1rem;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-tertiary);
-      font-size: 16px;
-      pointer-events: none;
-    }
-
-    .search-box input {
-      width: 100%;
-      padding: 13px 44px;
-      border: 0.5px solid var(--border-hover);
-      border-radius: var(--radius-lg);
-      font-size: 15px;
-      background: var(--surface);
-      color: var(--text-primary);
-      outline: none;
-      transition: box-shadow 0.15s, border-color 0.15s;
-    }
-
-    .search-box input:focus {
-      border-color: #378ADD;
-      box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
-    }
-
-    .search-box input::placeholder { color: var(--text-tertiary); }
-
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .search-icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
     .clear-btn {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-tertiary);
-      font-size: 16px;
-      display: none;
-      padding: 4px;
-      border-radius: 50%;
-      transition: color 0.12s;
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--muted); cursor: pointer; padding: 3px 8px; font-size: 11px;
+      display: none; transition: color 0.12s; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em;
     }
+    .clear-btn:hover { color: var(--text); }
 
-    .clear-btn:hover { color: var(--text-primary); }
-
-    .filter-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 1.25rem;
-    }
-
+    .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; animation: fadeUp 0.5s 0.2s ease both; }
     .filter-btn {
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-      border: 0.5px solid var(--border-hover);
-      background: var(--surface);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.12s;
+      padding: 5px 13px; border-radius: 6px; font-size: 11px; font-weight: 500;
+      font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.06em;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--muted); cursor: pointer; transition: all 0.14s; text-transform: uppercase;
+    }
+    .filter-btn:hover { border-color: var(--border-hi); color: var(--text); }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .result-meta {
+      font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+      margin-bottom: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+      min-height: 18px; animation: fadeUp 0.5s 0.25s ease both;
     }
 
-    .filter-btn:hover {
-      color: var(--text-primary);
-      border-color: var(--border-hover);
-    }
-
-    .filter-btn.active {
-      background: var(--text-primary);
-      color: var(--bg);
-      border-color: var(--text-primary);
-    }
-
-    .stats {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 1rem;
-    }
+    #results { animation: fadeUp 0.5s 0.3s ease both; }
 
     .result-card {
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1rem 1.25rem;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      transition: border-color 0.15s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 14px;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative; overflow: hidden;
     }
-
-    .result-card:hover { border-color: var(--border-hover); }
+    .result-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; border-radius: 3px 0 0 3px;
+      background: var(--stripe, #3b82f6); opacity: 0.8;
+    }
+    .result-card:hover { border-color: var(--border-hi); background: var(--surface2); }
 
     .olt-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
-      white-space: nowrap;
-      flex-shrink: 0;
-      margin-top: 2px;
+      display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 5px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500;
+      letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0; text-transform: uppercase;
     }
 
-    .olt-idc        { background: #D3E8FF; color: #0C447C; }
-    .olt-esperanca  { background: #FAEEDA; color: #633806; }
-    .olt-veneza     { background: #C0DD97; color: #27500A; }
-    .olt-timoteo    { background: #F4C0D1; color: #72243E; }
-    .olt-tplink01   { background: #9FE1CB; color: #085041; }
-    .olt-tplink02   { background: #B5D4F4; color: #0C447C; }
-    .olt-tplink03   { background: #F5C4B3; color: #712B13; }
-    .olt-tplink04   { background: #CECBF6; color: #3C3489; }
-    .olt-mangueiras { background: #B5D4F4; color: #185FA5; }
-    .olt-paraiso    { background: #FAEEDA; color: #854F0B; }
+    .k-idc        { --stripe:#3b82f6; } .b-idc        { background:#1d3557; color:#90caf9; }
+    .k-esperanca  { --stripe:#fbbf24; } .b-esperanca  { background:#2d1b00; color:#fbbf24; }
+    .k-veneza     { --stripe:#4ade80; } .b-veneza     { background:#0f2918; color:#4ade80; }
+    .k-timoteo    { --stripe:#f9a8d4; } .b-timoteo    { background:#2a1020; color:#f9a8d4; }
+    .k-tplink01   { --stripe:#38bdf8; } .b-tplink01   { background:#0d2233; color:#38bdf8; }
+    .k-tplink02   { --stripe:#a78bfa; } .b-tplink02   { background:#1a1240; color:#a78bfa; }
+    .k-tplink03   { --stripe:#fb923c; } .b-tplink03   { background:#2a1200; color:#fb923c; }
+    .k-tplink04   { --stripe:#86efac; } .b-tplink04   { background:#1a2a10; color:#86efac; }
+    .k-mangueiras { --stripe:#22d3ee; } .b-mangueiras { background:#001d2a; color:#22d3ee; }
+    .k-paraiso    { --stripe:#c084fc; } .b-paraiso    { background:#200d2d; color:#c084fc; }
 
-    .card-content { flex: 1; min-width: 0; }
+    .card-info { flex: 1; min-width: 0; }
+    .bairro-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .olt-full { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.03em; }
 
-    .bairro-name {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 3px;
-    }
+    .highlight { background: rgba(251,191,36,0.18); color: #fbbf24; border-radius: 2px; padding: 0 2px; }
 
-    .olt-name {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
+    .empty { text-align: center; padding: 4rem 0; color: var(--muted); }
+    .empty svg { width: 36px; height: 36px; stroke: var(--muted); fill: none; stroke-width: 1.5; margin-bottom: 12px; opacity: 0.4; display: block; margin-left: auto; margin-right: auto; }
+    .empty p { font-size: 13px; font-family: 'IBM Plex Mono', monospace; }
 
-    .highlight {
-      background: #FFF3B0;
-      color: #6B5A00;
-      border-radius: 2px;
-      padding: 0 2px;
-    }
+    footer { margin-top: 3rem; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.4; }
 
-    .empty {
-      text-align: center;
-      padding: 3rem 0;
-      color: var(--text-tertiary);
-      font-size: 14px;
-    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-    footer {
-      margin-top: 2.5rem;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-tertiary);
+    @media (max-width: 500px) {
+      .stat-pill .val { font-size: 15px; }
+      .header h1 { font-size: 22px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Buscador de OLT por Bairro</h1>
-      <p>Pesquise o bairro para descobrir qual OLT atende a região</p>
-    </header>
-
-    <div class="search-box">
-      <span class="search-icon">&#128269;</span>
-      <input type="text" id="searchInput" placeholder="Pesquisar bairro ou OLT..." autocomplete="off" />
-      <button class="clear-btn" id="clearBtn" onclick="clearSearch()">&#10005;</button>
+<div class="page">
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="logo-text">OLT Finder</span>
     </div>
-
-    <div class="filter-row" id="filterRow"></div>
-
-    <div class="stats" id="stats"></div>
-    <div id="results"></div>
-
-    <footer>Buscador de OLT &mdash; Todos os direitos reservados</footer>
+    <h1>Buscador de <strong>OLT</strong> por Bairro</h1>
+    <p>// pesquise o bairro e descubra qual OLT atende a região</p>
   </div>
 
-  <script>
-    const data = [
-      { bairro: "BETHANIA", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "VILA CELESTE", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "TIRADENTES", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "RESIDENCIAL BETHANIA", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "INDUSTRIAL", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "CANAA", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "CANAANZINHO", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "TAUBAS", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "GRANJAS VAGALUME", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "VILA MILITAR", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "JARDIM VITORIA", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "CHACARAS MADALENA", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "PARQUE CARAVELAS", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "BOM PASTOR", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "FURQUILHA", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "AGUAS CLARAS", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "PANORAMA", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "IGUAÇU", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "GRAN ROYALLE", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "CORREGO DA GARRAFA", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "BOM SUCESSO", olt: "IDC-OLT", oltKey: "idc" },
-      { bairro: "ESPERANÇA", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "BOM JARDIM", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "NOVO ESPERAÇA", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "IGUAÇU", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "IDEAL", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "LIMOEIRO", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "CHACARAS MADALENA", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "BARRA ALEGRA", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "PEDRA BRANCA", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "VILA CELESTE", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "VILA FORMOSA", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "CORREGO NOVO", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "CIDADE NOBRE", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "FERROVIARIOS", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "CORREGO DOS BECAS", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "MANGUEIRAS", olt: "OLT MANGUEIRAS / TPLINK MANGUEIRAS", oltKey: "mangueiras" },
-      { bairro: "BOM RETIRO", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "HORTO", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "AMARO LANARI", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "IMBAUBAS", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "DAS AGUAS", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "BELA VISTA", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "FABRICIANO", olt: "OLT ESPERANÇA", oltKey: "esperanca" },
-      { bairro: "VENEZA", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "CENTRO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "CIDADE NOVA", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "PARQUE DAS ÁGUAS", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "CARIRU", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "CASTELO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "PORTO SEGURO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "ILHA DO RIO DOCE", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "VILA IPANEMA", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "LAGOA SILVANA", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "AEROPORTO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "CHACARAS DO VALE", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "PARAISO", olt: "OLT HUAWEI X7 IDC PARAISO", oltKey: "paraiso" },
-      { bairro: "CENTRO DE SANTANA", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "CELO ORIENTE", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "OLIVEIRA", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "RESIDENCIAL PARAISO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "CHACARAS PARAISO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "AREIA GROSSA", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "ALTO DE SANTANA", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "JOSEFINO ANICIO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "VERANEIO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "VALE DO PARAISO", olt: "OLT HUAWEI IDC VENEZA", oltKey: "veneza" },
-      { bairro: "TIMOTEO", olt: "OLT TIMOTEO HUAWEI", oltKey: "timoteo" },
-      { bairro: "IPABA", olt: "OLT TPLINK 01 - IPABA / TEMPLATE TPLINK BRIDGE", oltKey: "tplink01" },
-      { bairro: "IPABA", olt: "OLT TPLINK 02 - IPABA / TEMPLATE TPLINK BRIDGE", oltKey: "tplink02" },
-      { bairro: "IPABA", olt: "OLT TPLINK 03 - IPABA / TEMPLATE TPLINK BRIDGE", oltKey: "tplink03" },
-      { bairro: "IPABA", olt: "OLT TPLINK 04 - IPABA / TEMPLATE TPLINK BRIDGE", oltKey: "tplink04" },
-    ];
+  <div class="stats-bar">
+    <div class="stat-pill"><div class="val" id="totalBairros">—</div><div class="lbl">Bairros</div></div>
+    <div class="stat-pill"><div class="val">10</div><div class="lbl">OLTs</div></div>
+    <div class="stat-pill"><div class="val" id="totalReg">—</div><div class="lbl">Registros</div></div>
+  </div>
 
-    const oltLabels = {
-      idc: "IDC-OLT",
-      esperanca: "OLT Esperança",
-      veneza: "OLT Huawei Veneza",
-      timoteo: "OLT Timoteo Huawei",
-      tplink01: "TPLink 01 - Ipaba",
-      tplink02: "TPLink 02 - Ipaba",
-      tplink03: "TPLink 03 - Ipaba",
-      tplink04: "TPLink 04 - Ipaba",
-      mangueiras: "OLT Mangueiras",
-      paraiso: "OLT Paraíso",
-    };
+  <div class="search-wrap">
+    <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+    <input type="text" id="searchInput" placeholder="ex: CENTRO, VENEZA, IPABA..." autocomplete="off" spellcheck="false" />
+    <button class="clear-btn" id="clearBtn" onclick="clearSearch()">ESC</button>
+  </div>
 
-    const filters = [
-      { key: "all", label: "Todos" },
-      { key: "idc", label: "IDC-OLT" },
-      { key: "esperanca", label: "Esperança" },
-      { key: "veneza", label: "Veneza" },
-      { key: "timoteo", label: "Timoteo" },
-      { key: "tplink01", label: "TPLink 01" },
-      { key: "tplink02", label: "TPLink 02" },
-      { key: "tplink03", label: "TPLink 03" },
-      { key: "tplink04", label: "TPLink 04" },
-      { key: "mangueiras", label: "Mangueiras" },
-      { key: "paraiso", label: "Paraíso" },
-    ];
+  <div class="filter-row" id="filterRow"></div>
+  <div class="result-meta" id="resultMeta"></div>
+  <div id="results"></div>
 
-    let activeFilter = "all";
-    let query = "";
+  <footer>&copy; 2025 &mdash; OLT Finder &mdash; todos os registros</footer>
+</div>
 
-    function renderFilters() {
-      document.getElementById("filterRow").innerHTML = filters.map(f =>
-        `<button class="filter-btn${activeFilter === f.key ? " active" : ""}" onclick="setFilter('${f.key}')">${f.label}</button>`
-      ).join("");
-    }
+<script>
+const data = [
+  {bairro:"BETHANIA",olt:"IDC-OLT",k:"idc"},
+  {bairro:"VILA CELESTE",olt:"IDC-OLT",k:"idc"},
+  {bairro:"TIRADENTES",olt:"IDC-OLT",k:"idc"},
+  {bairro:"RESIDENCIAL BETHANIA",olt:"IDC-OLT",k:"idc"},
+  {bairro:"INDUSTRIAL",olt:"IDC-OLT",k:"idc"},
+  {bairro:"CANAA",olt:"IDC-OLT",k:"idc"},
+  {bairro:"CANAANZINHO",olt:"IDC-OLT",k:"idc"},
+  {bairro:"TAUBAS",olt:"IDC-OLT",k:"idc"},
+  {bairro:"GRANJAS VAGALUME",olt:"IDC-OLT",k:"idc"},
+  {bairro:"VILA MILITAR",olt:"IDC-OLT",k:"idc"},
+  {bairro:"JARDIM VITORIA",olt:"IDC-OLT",k:"idc"},
+  {bairro:"CHACARAS MADALENA",olt:"IDC-OLT",k:"idc"},
+  {bairro:"PARQUE CARAVELAS",olt:"IDC-OLT",k:"idc"},
+  {bairro:"BOM PASTOR",olt:"IDC-OLT",k:"idc"},
+  {bairro:"FURQUILHA",olt:"IDC-OLT",k:"idc"},
+  {bairro:"AGUAS CLARAS",olt:"IDC-OLT",k:"idc"},
+  {bairro:"PANORAMA",olt:"IDC-OLT",k:"idc"},
+  {bairro:"IGUAÇU",olt:"IDC-OLT",k:"idc"},
+  {bairro:"GRAN ROYALLE",olt:"IDC-OLT",k:"idc"},
+  {bairro:"CORREGO DA GARRAFA",olt:"IDC-OLT",k:"idc"},
+  {bairro:"BOM SUCESSO",olt:"IDC-OLT",k:"idc"},
+  {bairro:"ESPERANÇA",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"BOM JARDIM",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"NOVO ESPERAÇA",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"IGUAÇU",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"IDEAL",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"LIMOEIRO",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"CHACARAS MADALENA",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"BARRA ALEGRA",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"PEDRA BRANCA",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"VILA CELESTE",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"VILA FORMOSA",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"CORREGO NOVO",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"CIDADE NOBRE",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"FERROVIARIOS",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"CORREGO DOS BECAS",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"MANGUEIRAS",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
+  {bairro:"BOM RETIRO",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"HORTO",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"AMARO LANARI",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"IMBAUBAS",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"DAS AGUAS",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"BELA VISTA",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"FABRICIANO",olt:"OLT ESPERANÇA",k:"esperanca"},
+  {bairro:"VENEZA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"CENTRO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"CIDADE NOVA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"PARQUE DAS ÁGUAS",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"CARIRU",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"CASTELO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"PORTO SEGURO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"ILHA DO RIO DOCE",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"VILA IPANEMA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"LAGOA SILVANA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"AEROPORTO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"CHACARAS DO VALE",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"PARAISO",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"CENTRO DE SANTANA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"CELO ORIENTE",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"OLIVEIRA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"RESIDENCIAL PARAISO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"CHACARAS PARAISO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"AREIA GROSSA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"ALTO DE SANTANA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"JOSEFINO ANICIO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"VERANEIO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"VALE DO PARAISO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+  {bairro:"TIMOTEO",olt:"OLT TIMOTEO HUAWEI",k:"timoteo"},
+  {bairro:"IPABA",olt:"OLT TPLINK 01 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink01"},
+  {bairro:"IPABA",olt:"OLT TPLINK 02 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink02"},
+  {bairro:"IPABA",olt:"OLT TPLINK 03 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink03"},
+  {bairro:"IPABA",olt:"OLT TPLINK 04 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink04"},
+];
 
-    function setFilter(key) {
-      activeFilter = key;
-      renderFilters();
-      render();
-    }
+const labels = {
+  idc:"IDC-OLT", esperanca:"OLT Esperança", veneza:"OLT Huawei Veneza",
+  timoteo:"OLT Timoteo", tplink01:"TPLink 01", tplink02:"TPLink 02",
+  tplink03:"TPLink 03", tplink04:"TPLink 04", mangueiras:"OLT Mangueiras", paraiso:"OLT Paraíso"
+};
 
-    function highlight(text, q) {
-      if (!q) return text;
-      const idx = text.toLowerCase().indexOf(q.toLowerCase());
-      if (idx === -1) return text;
-      return text.slice(0, idx) +
-        `<span class="highlight">${text.slice(idx, idx + q.length)}</span>` +
-        text.slice(idx + q.length);
-    }
+const filterDefs = [
+  {k:"all",l:"Todos"},{k:"idc",l:"IDC"},{k:"esperanca",l:"Esperança"},
+  {k:"veneza",l:"Veneza"},{k:"timoteo",l:"Timoteo"},{k:"tplink01",l:"TP01"},
+  {k:"tplink02",l:"TP02"},{k:"tplink03",l:"TP03"},{k:"tplink04",l:"TP04"},
+  {k:"mangueiras",l:"Mangueiras"},{k:"paraiso",l:"Paraíso"}
+];
 
-    function render() {
-      const q = query.trim();
-      document.getElementById("clearBtn").style.display = q ? "block" : "none";
+document.getElementById("totalBairros").textContent = new Set(data.map(d=>d.bairro)).size;
+document.getElementById("totalReg").textContent = data.length;
 
-      let filtered = data.filter(d => {
-        const matchFilter = activeFilter === "all" || d.oltKey === activeFilter;
-        const matchQuery = !q ||
-          d.bairro.toLowerCase().includes(q.toLowerCase()) ||
-          d.olt.toLowerCase().includes(q.toLowerCase());
-        return matchFilter && matchQuery;
-      });
+let activeFilter = "all", query = "";
 
-      const unique = [];
-      const seen = new Set();
-      filtered.forEach(d => {
-        const key = d.bairro + "||" + d.olt;
-        if (!seen.has(key)) { seen.add(key); unique.push(d); }
-      });
+function renderFilters() {
+  document.getElementById("filterRow").innerHTML = filterDefs.map(f =>
+    `<button class="filter-btn${activeFilter===f.k?" active":""}" onclick="setFilter('${f.k}')">${f.l}</button>`
+  ).join("");
+}
 
-      document.getElementById("stats").textContent =
-        unique.length === 0 ? "" :
-        `${unique.length} resultado${unique.length !== 1 ? "s" : ""} encontrado${unique.length !== 1 ? "s" : ""}`;
+function setFilter(k) { activeFilter = k; renderFilters(); render(); }
 
-      if (unique.length === 0) {
-        document.getElementById("results").innerHTML =
-          `<div class="empty">Nenhum bairro encontrado para "<strong>${q || oltLabels[activeFilter] || activeFilter}</strong>"</div>`;
-        return;
-      }
+function hl(text, q) {
+  if (!q) return text;
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i === -1) return text;
+  return text.slice(0,i)+`<span class="highlight">${text.slice(i,i+q.length)}</span>`+text.slice(i+q.length);
+}
 
-      document.getElementById("results").innerHTML = unique.map(d => `
-        <div class="result-card">
-          <span class="olt-badge olt-${d.oltKey}">${oltLabels[d.oltKey] || d.olt}</span>
-          <div class="card-content">
-            <div class="bairro-name">${highlight(d.bairro, q)}</div>
-            <div class="olt-name">${highlight(d.olt, q)}</div>
-          </div>
-        </div>
-      `).join("");
-    }
+function render() {
+  const q = query.trim();
+  document.getElementById("clearBtn").style.display = q ? "block" : "none";
 
-    function clearSearch() {
-      document.getElementById("searchInput").value = "";
-      query = "";
-      render();
-    }
+  const seen = new Set();
+  const unique = data.filter(d => {
+    const fOk = activeFilter==="all" || d.k===activeFilter;
+    const qOk = !q || d.bairro.toLowerCase().includes(q.toLowerCase()) || d.olt.toLowerCase().includes(q.toLowerCase());
+    if (!fOk||!qOk) return false;
+    const key = d.bairro+d.olt;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
 
-    document.getElementById("searchInput").addEventListener("input", function () {
-      query = this.value;
-      render();
-    });
+  document.getElementById("resultMeta").textContent = unique.length > 0
+    ? `// ${unique.length} registro${unique.length!==1?"s":""} encontrado${unique.length!==1?"s":""}`
+    : "";
 
-    renderFilters();
-    render();
-  </script>
+  if (unique.length === 0) {
+    document.getElementById("results").innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p>// nenhum resultado para "${q || labels[activeFilter] || activeFilter}"</p>
+    </div>`;
+    return;
+  }
+
+  document.getElementById("results").innerHTML = unique.map(d => `
+    <div class="result-card k-${d.k}">
+      <span class="olt-badge b-${d.k}">${labels[d.k]||d.k}</span>
+      <div class="card-info">
+        <div class="bairro-name">${hl(d.bairro,q)}</div>
+        <div class="olt-full">${hl(d.olt,q)}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function clearSearch() {
+  document.getElementById("searchInput").value=""; query=""; render();
+}
+
+document.getElementById("searchInput").addEventListener("input", function(){ query=this.value; render(); });
+renderFilters(); render();
+</script>
 </body>
 </html>
