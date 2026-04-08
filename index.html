@@ -108,16 +108,16 @@
       letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0; text-transform: uppercase;
     }
 
-    .k-idc        { --stripe:#3b82f6; } .b-idc        { background:#1d3557; color:#90caf9; }
-    .k-esperanca  { --stripe:#fbbf24; } .b-esperanca  { background:#2d1b00; color:#fbbf24; }
-    .k-veneza     { --stripe:#4ade80; } .b-veneza     { background:#0f2918; color:#4ade80; }
-    .k-timoteo    { --stripe:#f9a8d4; } .b-timoteo    { background:#2a1020; color:#f9a8d4; }
-    .k-tplink01   { --stripe:#38bdf8; } .b-tplink01   { background:#0d2233; color:#38bdf8; }
-    .k-tplink02   { --stripe:#a78bfa; } .b-tplink02   { background:#1a1240; color:#a78bfa; }
-    .k-tplink03   { --stripe:#fb923c; } .b-tplink03   { background:#2a1200; color:#fb923c; }
-    .k-tplink04   { --stripe:#86efac; } .b-tplink04   { background:#1a2a10; color:#86efac; }
-    .k-mangueiras { --stripe:#22d3ee; } .b-mangueiras { background:#001d2a; color:#22d3ee; }
-    .k-paraiso    { --stripe:#c084fc; } .b-paraiso    { background:#200d2d; color:#c084fc; }
+    .k-idc         { --stripe:#3b82f6; } .b-idc         { background:#1d3557; color:#90caf9; }
+    .k-esperanca   { --stripe:#fbbf24; } .b-esperanca   { background:#2d1b00; color:#fbbf24; }
+    .k-veneza      { --stripe:#4ade80; } .b-veneza      { background:#0f2918; color:#4ade80; }
+    .k-timoteo     { --stripe:#f9a8d4; } .b-timoteo     { background:#2a1020; color:#f9a8d4; }
+    .k-tplink01    { --stripe:#38bdf8; } .b-tplink01    { background:#0d2233; color:#38bdf8; }
+    .k-tplink02    { --stripe:#a78bfa; } .b-tplink02    { background:#1a1240; color:#a78bfa; }
+    .k-tplink03    { --stripe:#fb923c; } .b-tplink03    { background:#2a1200; color:#fb923c; }
+    .k-tplink04    { --stripe:#86efac; } .b-tplink04    { background:#1a2a10; color:#86efac; }
+    .k-mangueiras  { --stripe:#22d3ee; } .b-mangueiras  { background:#001d2a; color:#22d3ee; }
+    .k-paraiso     { --stripe:#c084fc; } .b-paraiso     { background:#200d2d; color:#c084fc; }
 
     .card-info { flex: 1; min-width: 0; }
     .bairro-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
@@ -168,11 +168,12 @@
   <div class="result-meta" id="resultMeta"></div>
   <div id="results"></div>
 
-  <footer>&copy; 2025 &mdash; OLT Finder &mdash; todos os registros</footer>
+  <footer>&copy; 2026 &mdash; OLT Finder &mdash; todos os registros</footer>
 </div>
 
 <script>
 const data = [
+  // IDC-OLT
   {bairro:"BETHANIA",olt:"IDC-OLT",k:"idc"},
   {bairro:"VILA CELESTE",olt:"IDC-OLT",k:"idc"},
   {bairro:"TIRADENTES",olt:"IDC-OLT",k:"idc"},
@@ -194,6 +195,8 @@ const data = [
   {bairro:"GRAN ROYALLE",olt:"IDC-OLT",k:"idc"},
   {bairro:"CORREGO DA GARRAFA",olt:"IDC-OLT",k:"idc"},
   {bairro:"BOM SUCESSO",olt:"IDC-OLT",k:"idc"},
+
+  // OLT ESPERANÇA
   {bairro:"ESPERANÇA",olt:"OLT ESPERANÇA",k:"esperanca"},
   {bairro:"BOM JARDIM",olt:"OLT ESPERANÇA",k:"esperanca"},
   {bairro:"NOVO ESPERAÇA",olt:"OLT ESPERANÇA",k:"esperanca"},
@@ -209,14 +212,17 @@ const data = [
   {bairro:"CIDADE NOBRE",olt:"OLT ESPERANÇA",k:"esperanca"},
   {bairro:"FERROVIARIOS",olt:"OLT ESPERANÇA",k:"esperanca"},
   {bairro:"CORREGO DOS BECAS",olt:"OLT ESPERANÇA",k:"esperanca"},
-  {bairro:"MANGUEIRAS",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
-  {bairro:"BOM RETIRO",olt:"OLT ESPERANÇA",k:"esperanca"},
-  {bairro:"HORTO",olt:"OLT ESPERANÇA",k:"esperanca"},
-  {bairro:"AMARO LANARI",olt:"OLT ESPERANÇA",k:"esperanca"},
-  {bairro:"IMBAUBAS",olt:"OLT ESPERANÇA",k:"esperanca"},
-  {bairro:"DAS AGUAS",olt:"OLT ESPERANÇA",k:"esperanca"},
-  {bairro:"BELA VISTA",olt:"OLT ESPERANÇA",k:"esperanca"},
-  {bairro:"FABRICIANO",olt:"OLT ESPERANÇA",k:"esperanca"},
+
+  // OLT MANGUEIRAS / TPLINK MANGUEIRAS
+  {bairro:"BOM RETIRO",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
+  {bairro:"HORTO",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
+  {bairro:"AMARO LANARI",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
+  {bairro:"IMBAUBAS",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
+  {bairro:"DAS AGUAS",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
+  {bairro:"BELA VISTA",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
+  {bairro:"FABRICIANO",olt:"OLT MANGUEIRAS / TPLINK MANGUEIRAS",k:"mangueiras"},
+
+  // OLT HUAWEI IDC VENEZA
   {bairro:"VENEZA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
   {bairro:"CENTRO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
   {bairro:"CIDADE NOVA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
@@ -229,22 +235,27 @@ const data = [
   {bairro:"LAGOA SILVANA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
   {bairro:"AEROPORTO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
   {bairro:"CHACARAS DO VALE",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"PARAISO",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
-  {bairro:"CENTRO DE SANTANA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"CELO ORIENTE",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"OLIVEIRA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"RESIDENCIAL PARAISO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"CHACARAS PARAISO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"AREIA GROSSA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"ALTO DE SANTANA",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"JOSEFINO ANICIO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"VERANEIO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
-  {bairro:"VALE DO PARAISO",olt:"OLT HUAWEI IDC VENEZA",k:"veneza"},
+
+  // OLT HUAWEI X7 IDC PARAISO
+  {bairro:"CENTRO DE SANTANA",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"CELO ORIENTE",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"OLIVEIRA",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"RESIDENCIAL PARAISO",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"CHACARAS PARAISO",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"AREIA GROSSA",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"ALTO DE SANTANA",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"JOSEFINO ANICIO",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"VERANEIO",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+  {bairro:"VALE DO PARAISO",olt:"OLT HUAWEI X7 IDC PARAISO",k:"paraiso"},
+
+  // OLT TIMOTEO HUAWEI
   {bairro:"TIMOTEO",olt:"OLT TIMOTEO HUAWEI",k:"timoteo"},
+
+  // OLTs IPABA
   {bairro:"IPABA",olt:"OLT TPLINK 01 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink01"},
   {bairro:"IPABA",olt:"OLT TPLINK 02 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink02"},
   {bairro:"IPABA",olt:"OLT TPLINK 03 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink03"},
-  {bairro:"IPABA",olt:"OLT TPLINK 04 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink04"},
+  {bairro:"IPABA",olt:"OLT TPLINK 04 - IPABA / TEMPLATE TPLINK BRIDGE",k:"tplink04"}
 ];
 
 const labels = {
